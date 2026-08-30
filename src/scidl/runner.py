@@ -59,7 +59,9 @@ def download_one(doi: str, output: Path, sources: ScholarlySources, *,
     return DownloadResult(doi, discovered.title, last_status.value, message=last_message)
 
 
-def run_batch(dois: list[str], output: Path, sources: ScholarlySources, **kwargs) -> list[DownloadResult]:
+def run_batch(
+    dois: list[str], output: Path, sources: ScholarlySources, **kwargs
+) -> list[DownloadResult]:
     """Run conservatively and sequentially; source requests enforce one request per second."""
     output.mkdir(parents=True, exist_ok=True)
     return [download_one(doi, output, sources, **kwargs) for doi in dict.fromkeys(dois)]

@@ -19,7 +19,10 @@ def load_header_file(path: str | None) -> dict[str, str]:
     if not path:
         return {}
     data = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(data, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in data.items()):
+    valid = isinstance(data, dict) and all(
+        isinstance(key, str) and isinstance(value, str) for key, value in data.items()
+    )
+    if not valid:
         raise ValueError("header file must contain a JSON object of string values")
     return data
 

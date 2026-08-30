@@ -1,5 +1,4 @@
 import logging
-from types import SimpleNamespace
 
 from scidl.downloader import is_valid_pdf
 from scidl.security import redact

@@ -29,7 +29,8 @@ class ScholarlySources:
                  timeout: int = 45, max_retries: int = 3,
                  authorized: bool = False, session: requests.Session | None = None):
         contact = f"; mailto:{email}" if email else ""
-        self.headers = {"User-Agent": f"sci-dl/0.3 (+https://github.com/GEROGEFLOOD/sci_download{contact})"}
+        project_url = "https://github.com/GEROGEFLOOD/sci_download"
+        self.headers = {"User-Agent": f"sci-dl/0.3 (+{project_url}{contact})"}
         self.email = email
         self.interval = 1.0 / max(0.1, min(1.0, requests_per_second))
         self.timeout = timeout
@@ -83,9 +84,15 @@ class ScholarlySources:
             if response.ok:
                 records = response.json().get("resultList", {}).get("result", [])
                 for record in records:
-                    pmcid = record.get("pmcid") or (record.get("id") if record.get("source") == "PMC" else None)
+                    pmcid = record.get("pmcid")
+                    if not pmcid and record.get("source") == "PMC":
+                        pmcid = record.get("id")
                     if pmcid:
-                        self._append(candidates, "europe_pmc", f"https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextPDF")
+                        pdf_url = (
+                            "https://www.ebi.ac.uk/europepmc/webservices/rest/"
+                            f"{pmcid}/fullTextPDF"
+                        )
+                        self._append(candidates, "europe_pmc", pdf_url)
         except (requests.RequestException, ValueError, KeyError):
             pass
 
@@ -97,7 +104,8 @@ class ScholarlySources:
                 if response.ok:
                     data = response.json()
                     location = data.get("best_oa_location") or {}
-                    self._append(candidates, "unpaywall", location.get("url_for_pdf") or location.get("url"))
+                    pdf_url = location.get("url_for_pdf") or location.get("url")
+                    self._append(candidates, "unpaywall", pdf_url)
             except (requests.RequestException, ValueError, KeyError):
                 pass
 
@@ -117,7 +125,8 @@ class ScholarlySources:
         # default; user credentials are honored solely in --authorized-access mode.
         restriction = None
         try:
-            response = self._get(f"https://doi.org/{urllib.parse.quote(doi, safe='/')}", allow_redirects=True)
+            landing_url = f"https://doi.org/{urllib.parse.quote(doi, safe='/')}"
+            response = self._get(landing_url, allow_redirects=True)
             decision = evaluate_response(response)
             if decision not in (AccessDecision.ALLOW, AccessDecision.UNKNOWN):
                 restriction = decision

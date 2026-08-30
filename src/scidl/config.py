@@ -46,11 +46,14 @@ def load_config(path: Path | None = None) -> dict:
     if isinstance(general, dict):
         for key, default in config["general"].items():
             value = general.get(key, default)
-            if isinstance(value, type(default)) or (isinstance(default, float) and isinstance(value, int)):
+            same_type = isinstance(value, type(default))
+            numeric_float = isinstance(default, float) and isinstance(value, int)
+            if same_type or numeric_float:
                 config["general"][key] = value
     config["general"]["max_concurrency"] = min(2, max(1, config["general"]["max_concurrency"]))
     config["general"]["max_retries"] = min(3, max(1, config["general"]["max_retries"]))
-    config["general"]["requests_per_second"] = min(1.0, max(0.1, float(config["general"]["requests_per_second"])))
+    rate = float(config["general"]["requests_per_second"])
+    config["general"]["requests_per_second"] = min(1.0, max(0.1, rate))
     return config
 
 

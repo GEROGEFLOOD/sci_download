@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# Download leftovers
+*.part
+*_e2e/
+
+# Local task lists, reports, and downloaded content
+failed_tasks.txt
+download_report.csv
+papers/
